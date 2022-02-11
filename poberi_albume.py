@@ -46,7 +46,7 @@ vzorec_sekundarnih_zanrov = re.compile(
 )
 
 vzorec_oznake = re.compile(
-    r'<span class="topcharts_item_descriptors">(?P<oznaka>),?\s?</span>'
+    r'<span class="topcharts_item_descriptors">(?P<oznaka>\w+),?\s?</span>'
 )
 
 headers = {'User-Agent': 'My User Agent 1.0'}
