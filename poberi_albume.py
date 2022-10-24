@@ -82,19 +82,19 @@ for stran in range(1, STEVILO_STRANI + 1):
 #našlo je 5000 blokov, epsko!
 
 
-def izloci_zanre(niz):
+def doloci_zanre(niz):
     zanri = []
     for zanr in vzorec_zanrov.finditer(niz):
         zanri.append(zanr.groupdict()['zanr'])
     return zanri
 
-def izloci_sekundarne_zanre(niz):
+def doloci_sekundarne_zanre(niz):
     sekundarni_zanri = []
     for zanr in vzorec_sekundarnih_zanrov.finditer(niz):
         sekundarni_zanri.append(zanr.groupdict()['sekundarni_zanr'])
     return sekundarni_zanri
 
-def izloci_oznake(niz):
+def doloci_oznake(niz):
     oznake = []
     for oznaka in vzorec_oznake.finditer(niz):
         oznake.append(oznaka.groupdict()['oznaka'])
@@ -120,17 +120,17 @@ def izloci_podatke_albuma(blok):
     album['stevilo ocen'] = stevilo_ocen['stevilo_ocen'].replace(',','') if stevilo_ocen else None
     string_kritik = str(vzorec_stevila_kritik.search(blok)['stevilo_kritik'])
     album['stevilo kritik'] = int(string_kritik.replace(',', ''))
-    zanri = izloci_zanre(blok)
+    zanri = doloci_zanre(blok)
     if zanri != []:
         album['zanri'] = ', '.join(zanri)
     else:
         album['zanri'] = None
-    sekundarni_zanri = izloci_sekundarne_zanre(blok)
+    sekundarni_zanri = doloci_sekundarne_zanre(blok)
     if sekundarni_zanri != []:
         album['sekundarni zanri'] = ', '.join(sekundarni_zanri)
     else:
         album['sekundarni zanri'] = None
-    oznake = izloci_oznake(blok)
+    oznake = doloci_oznake(blok)
     if oznake != []:
         album['oznake'] = ', '.join(oznake)
     else:
@@ -143,11 +143,37 @@ def albumi_na_strani(stran):
     for blok in vzorec_bloka.finditer(vsebina):
         yield izloci_podatke_albuma(blok.group(0))  #vrne celoten match
 
+def izloci_zanre(albumi):
+    zanri = []
+    for album in albumi:
+        str_zanri = album['zanri']
+        if str_zanri == None:
+            zanri = zanri
+        else:
+            for zanr in str_zanri.split(", "):
+                zanri.append({'album' : album['id'], 'zanr' : zanr})
+            zanri.sort(key=lambda zanr : (zanr['album'], zanr['zanr']))
+    return zanri
+
+def izloci_oznake(albumi):
+    oznake = []
+    for album in albumi:
+        str_oznake = album['oznake']
+        if str_oznake == None:
+            oznake = oznake
+        else:
+            for oznaka in str_oznake.split(", "):
+                oznake.append({'album' : album['id'], 'oznaka' : oznaka})
+            oznake.sort(key=lambda oznaka: (oznaka['album'], oznaka['oznaka']))
+    return oznake
+
 albumi = []
 for stran in range(1, 126):
     for album in albumi_na_strani(stran):
         albumi.append(album)
 albumi.sort(key=lambda album: album['mesto'])
+zanri = izloci_zanre(albumi)
+oznake = izloci_oznake(albumi)
 orodja.zapisi_json(albumi, 'obdelani-podatki/albumi.json')
 orodja.zapisi_csv(
     albumi,
@@ -155,3 +181,11 @@ orodja.zapisi_csv(
     'stevilo kritik', 'zanri', 'sekundarni zanri', 'oznake'],
     'obdelani-podatki/albumi.csv'
 )
+#če hočem te pobrat, rabim najprej 'pop'-at ven odvečne podatke
+orodja.zapisi_csv(
+    albumi,
+    ['mesto', 'id', 'naslov', 'izvajalec', 'datum izdaje', 'povprecna ocena'],
+    'obdelani-podatki/albumi-osnovno.csv'
+)
+orodja.zapisi_csv(zanri, ['album', 'zanr'], 'obdelani-podatki/zanri.csv')
+orodja.zapisi_csv(oznake, ['album', 'oznaka'], 'obdelani-podatki/oznake.csv')
