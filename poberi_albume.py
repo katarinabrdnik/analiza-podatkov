@@ -2,6 +2,7 @@ import requests
 import os.path
 import re
 import orodja
+import html
 
 STEVILO_STRANI = 125
 STEVILO_ALBUMOV_NA_STRAN = 40
@@ -18,6 +19,11 @@ vzorec_albuma = re.compile(
     r'<div class="topcharts_item_title"><a href=".*?" '
     r'class="release" title="\[Album(?P<id>\d+)\]">(?P<naslov>.*?)</a></div>.*?'
     r'class="artist">(?P<izvajalec>.*?)</a></div>',
+    flags=re.DOTALL
+)
+
+vzorec_izvajalca = re.compile(
+    r'href="/artist/.*?" class="artist">(?P<izvajalec>.*?)</a>',
     flags=re.DOTALL
 )
 
@@ -81,17 +87,22 @@ for stran in range(1, STEVILO_STRANI + 1):
 #print(najdeni_albumi)
 #našlo je 5000 blokov, epsko!
 
+def doloci_izvajalce(niz):
+    izvajalci = []
+    for izvajalec in vzorec_izvajalca.finditer(niz):
+        izvajalci.append(html.unescape(izvajalec.groupdict()['izvajalec']))
+    return izvajalci
 
 def doloci_zanre(niz):
     zanri = []
     for zanr in vzorec_zanrov.finditer(niz):
-        zanri.append(zanr.groupdict()['zanr'])
+        zanri.append(html.unescape(zanr.groupdict()['zanr']))
     return zanri
 
 def doloci_sekundarne_zanre(niz):
     sekundarni_zanri = []
     for zanr in vzorec_sekundarnih_zanrov.finditer(niz):
-        sekundarni_zanri.append(zanr.groupdict()['sekundarni_zanr'])
+        sekundarni_zanri.append(html.unescape(zanr.groupdict()['sekundarni_zanr']))
     return sekundarni_zanri
 
 def doloci_oznake(niz):
@@ -104,8 +115,9 @@ def izloci_podatke_albuma(blok):
     album = vzorec_albuma.search(blok).groupdict()
     album['mesto'] = int(album['mesto'])
     album['id'] = int(album['id'])
-    album['naslov'] = album['naslov']
-    album['izvajalec'] = album['izvajalec']
+    album['naslov'] = html.unescape(album['naslov'])
+    izvajalci = doloci_izvajalce(blok)
+    album['izvajalec'] = ', '.join(izvajalci)
     datum_izdaje = vzorec_datuma_izdaje.search(blok)
     if datum_izdaje: 
         album['datum izdaje'] = datum_izdaje['datum_izdaje']
@@ -181,11 +193,12 @@ orodja.zapisi_csv(
     'stevilo kritik', 'zanri', 'sekundarni zanri', 'oznake'],
     'obdelani-podatki/albumi.csv'
 )
+
 #če hočem te pobrat, rabim najprej 'pop'-at ven odvečne podatke
-orodja.zapisi_csv(
-    albumi,
-    ['mesto', 'id', 'naslov', 'izvajalec', 'datum izdaje', 'povprecna ocena'],
-    'obdelani-podatki/albumi-osnovno.csv'
-)
-orodja.zapisi_csv(zanri, ['album', 'zanr'], 'obdelani-podatki/zanri.csv')
-orodja.zapisi_csv(oznake, ['album', 'oznaka'], 'obdelani-podatki/oznake.csv')
+#orodja.zapisi_csv(
+#    albumi,
+#    ['mesto', 'id', 'naslov', 'izvajalec', 'datum izdaje', 'povprecna ocena'],
+#    'obdelani-podatki/albumi-osnovno.csv'
+#)
+#orodja.zapisi_csv(zanri, ['album', 'zanr'], 'obdelani-podatki/zanri.csv')
+#orodja.zapisi_csv(oznake, ['album', 'oznaka'], 'obdelani-podatki/oznake.csv')
