@@ -52,7 +52,7 @@ vzorec_sekundarnih_zanrov = re.compile(
 )
 
 vzorec_oznake = re.compile(
-    r'<span class="topcharts_item_descriptors">(?P<oznaka>\w+),?\s?</span>'
+    r'<span class="topcharts_item_descriptors">(?P<oznaka>[\w\s]+),?\s?</span>'
 )
 
 headers = {'User-Agent': 'My User Agent 1.0'}
@@ -200,5 +200,5 @@ orodja.zapisi_csv(
 #    ['mesto', 'id', 'naslov', 'izvajalec', 'datum izdaje', 'povprecna ocena'],
 #    'obdelani-podatki/albumi-osnovno.csv'
 #)
-#orodja.zapisi_csv(zanri, ['album', 'zanr'], 'obdelani-podatki/zanri.csv')
-#orodja.zapisi_csv(oznake, ['album', 'oznaka'], 'obdelani-podatki/oznake.csv')
+#orodja.zapisi_csv(albumi, ['album', 'zanr'], 'obdelani-podatki/zanri.csv')
+#orodja.zapisi_csv(albumi, ['album', 'oznaka'], 'obdelani-podatki/oznake.csv')
