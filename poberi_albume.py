@@ -84,8 +84,6 @@ for stran in range(1, STEVILO_STRANI + 1):
 
 #print(najdeni_albumi)
 
-#print(najdeni_albumi)
-#našlo je 5000 blokov, epsko!
 
 def doloci_izvajalce(niz):
     izvajalci = []
@@ -193,12 +191,3 @@ orodja.zapisi_csv(
     'stevilo kritik', 'zanri', 'sekundarni zanri', 'oznake'],
     'obdelani-podatki/albumi.csv'
 )
-
-#če hočem te pobrat, rabim najprej 'pop'-at ven odvečne podatke
-#orodja.zapisi_csv(
-#    albumi,
-#    ['mesto', 'id', 'naslov', 'izvajalec', 'datum izdaje', 'povprecna ocena'],
-#    'obdelani-podatki/albumi-osnovno.csv'
-#)
-#orodja.zapisi_csv(albumi, ['album', 'zanr'], 'obdelani-podatki/zanri.csv')
-#orodja.zapisi_csv(albumi, ['album', 'oznaka'], 'obdelani-podatki/oznake.csv')
